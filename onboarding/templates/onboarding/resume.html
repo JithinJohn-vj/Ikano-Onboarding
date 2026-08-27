@@ -1,0 +1,17 @@
+{% extends "onboarding/base.html" %}
+{% block title %}Resume application{% endblock %}
+{% block content %}
+<h1>Resume your application</h1>
+<p class="lede">Paste the resume link (or just the token from the end of it) that was shown when you started.</p>
+
+<form method="post" class="card">
+    {% csrf_token %}
+    <div class="field-group">
+        <label for="id_token">Resume token</label>
+        <input type="text" id="id_token" name="token" placeholder="e.g. Xy19...">
+    </div>
+    <button type="submit" class="btn-primary">Resume</button>
+</form>
+
+<p class="muted-link"><a href="{% url 'start' %}">Or start a new application</a></p>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "onboarding/base.html" %}
+{% block title %}Review & submit{% endblock %}
+{% block content %}
+
+<div class="progress"><div class="progress-bar" style="width: {{ progress.percent }}%"></div></div>
+<p class="progress-label">Final step</p>
+
+<h1>Review your application</h1>
+<p class="lede">Check everything looks right, then submit. Sensitive identifiers below are masked for your protection.</p>
+
+{% for a in answers %}
+    <section class="card">
+        <h3>{{ a.step_title }}</h3>
+        <dl class="summary-list">
+            {% for key, value in a.data.items %}
+                <dt>{{ key }}</dt><dd>{{ value }}</dd>
+            {% endfor %}
+        </dl>
+    </section>
+{% endfor %}
+
+<section class="card">
+    <h3>Checks run so far</h3>
+    <table class="results-table">
+        <thead><tr><th>Check</th><th>Outcome</th></tr></thead>
+        <tbody>
+        {% for r in integration_results %}
+            <tr><td>{{ r.check_type }}</td><td><span class="pill pill-{{ r.outcome }}">{{ r.outcome }}</span></td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+<form method="post" class="card">
+    {% csrf_token %}
+    <label class="option-tile">
+        <input type="checkbox" name="terms_accepted">
+        <span>I confirm the information above is accurate and I accept the terms & conditions.</span>
+    </label>
+    <button type="submit" class="btn-primary">Submit application</button>
+</form>
+{% endblock %}

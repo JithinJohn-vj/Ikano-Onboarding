@@ -1,0 +1,53 @@
+{% extends "onboarding/base.html" %}
+{% block title %}{{ step.title }}{% endblock %}
+{% block content %}
+
+<div class="progress-wrap">
+    <div class="progress-meta"><span>Application progress</span><strong>{{ progress.percent }}%</strong></div>
+    <div class="progress">
+        <div class="progress-bar" style="width: {{ progress.percent }}%"></div>
+    </div>
+</div>
+<p class="progress-label">Step {{ progress.current }} of {{ progress.total }}</p>
+
+<p class="eyebrow">Application details</p>
+<h1>{{ step.title }}</h1>
+{% if step.description %}<p class="lede">{{ step.description }}</p>{% endif %}
+
+<form method="post" class="card form-card">
+    {% csrf_token %}
+    {% for row in rows %}
+        <div class="field-group {% if row.error %}has-error{% endif %}">
+            <label for="id_{{ row.field.name }}">{{ row.field.label }}{% if row.field.required %} *{% endif %}</label>
+
+            {% if row.field.type == "checkbox" %}
+                <input type="checkbox" id="id_{{ row.field.name }}" name="{{ row.field.name }}" {% if row.value %}checked{% endif %}>
+            {% elif row.field.type == "select" %}
+                <select id="id_{{ row.field.name }}" name="{{ row.field.name }}">
+                    <option value="">-- choose --</option>
+                    {% for opt_value, opt_label in row.field.choices %}
+                        <option value="{{ opt_value }}" {% if row.value == opt_value %}selected{% endif %}>{{ opt_label }}</option>
+                    {% endfor %}
+                </select>
+            {% elif row.field.type == "textarea" %}
+                <textarea id="id_{{ row.field.name }}" name="{{ row.field.name }}" rows="4"{% if row.field.min_length %} minlength="{{ row.field.min_length }}"{% endif %}{% if row.field.max_length %} maxlength="{{ row.field.max_length }}"{% endif %}>{{ row.value }}</textarea>
+            {% elif row.field.type == "date" %}
+                <input type="date" id="id_{{ row.field.name }}" name="{{ row.field.name }}" value="{{ row.value }}">
+            {% elif row.field.type == "number" %}
+                <input type="number" {% if row.field.integer_only %}step="1"{% else %}step="any"{% endif %} id="id_{{ row.field.name }}" name="{{ row.field.name }}" value="{{ row.value }}"{% if row.field.min_value is not None %} min="{{ row.field.min_value }}"{% endif %}{% if row.field.max_value is not None %} max="{{ row.field.max_value }}"{% endif %}>
+            {% elif row.field.type == "email" %}
+                <input type="email" id="id_{{ row.field.name }}" name="{{ row.field.name }}" value="{{ row.value }}"{% if row.field.max_length %} maxlength="{{ row.field.max_length }}"{% endif %}>
+            {% else %}
+                <input type="text" id="id_{{ row.field.name }}" name="{{ row.field.name }}" value="{{ row.value }}"{% if row.field.pattern %} pattern="{{ row.field.pattern }}"{% endif %}{% if row.field.min_length %} minlength="{{ row.field.min_length }}"{% endif %}{% if row.field.max_length %} maxlength="{{ row.field.max_length }}"{% endif %}>
+            {% endif %}
+
+            {% if row.field.help_text %}<p class="help-text">{{ row.field.help_text }}</p>{% endif %}
+            {% if row.error %}<p class="error-text">{{ row.error }}</p>{% endif %}
+        </div>
+    {% empty %}
+        <p class="lede">This step just runs a check on information you've already provided.</p>
+    {% endfor %}
+
+    <div class="form-action"><button type="submit" class="btn-primary">Continue <span aria-hidden="true">→</span></button><span>Required fields are marked *</span></div>
+</form>
+{% endblock %}

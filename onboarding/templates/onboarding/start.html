@@ -1,0 +1,54 @@
+{% extends "onboarding/base.html" %}
+{% block title %}Start onboarding{% endblock %}
+{% block body_class %}start-page{% endblock %}
+{% block content %}
+<style>
+    body.start-page { background: #0b0b0c; color: #f4f4f5; }
+    .start-page .site-header { background: #0b0b0c; border: 0; }
+    .start-page .header-inner { min-height: 88px; width: min(660px, calc(100% - 40px)); }
+    .start-page .header-link { top: 32px; color: #c8c8cb; font-size: 13px; }
+    .start-page .header-link:hover { color: #ffffff; }
+    .start-page .container { width: min(660px, calc(100% - 40px)); padding: 26px 0 56px; }
+    .start-page .site-footer { display: none; }
+    .onboarding-shell { padding: 34px 38px 32px; border: 1px solid #242426; border-radius: 18px; background: #121213; box-shadow: 0 24px 80px rgba(0, 0, 0, .34); }
+    .setup-head { margin-bottom: 30px; }.setup-head h1 { margin: 0 0 9px; color: #f9f9fa; font-size: clamp(29px, 4vw, 38px); }.setup-head p { max-width: 520px; margin: 0; color: #b5b5ba; font-size: 15px; }
+    .setup-progress { margin-bottom: 34px; }.setup-progress__bars { display: grid; grid-template-columns: repeat(5, 1fr); gap: 9px; margin-bottom: 16px; }.setup-progress__bars span { height: 5px; border-radius: 999px; background: #303034; }.setup-progress__bars span:first-child { background: #2187f4; }.setup-progress p { margin: 0; color: #a7a7ac; font-size: 13px; }
+    .dark-fieldset { margin: 0 0 28px; padding: 0; border: 0; }.dark-fieldset legend { margin-bottom: 11px; color: #dedee1; font-size: 14px; font-weight: 700; }
+    .country-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }.choice-card { position: relative; display: flex; align-items: center; min-height: 112px; padding: 14px; border: 1px solid #303034; border-radius: 13px; background: #1b1b1d; color: #dedee1; cursor: pointer; transition: border-color .18s, background .18s, transform .18s; }.choice-card:hover { border-color: #5b5b61; transform: translateY(-1px); }.choice-card input { position: absolute; opacity: 0; }.choice-card:has(input:checked) { border: 2px solid #1877d2; background: #0d1825; }.choice-card:has(input:focus-visible) { outline: 3px solid rgba(33, 135, 244, .36); outline-offset: 2px; }
+    .country-card { justify-content: center; text-align: center; }.country-card span { display: grid; gap: 7px; font-weight: 700; }.country-card em { font-size: 20px; font-style: normal; }
+    .account-options { display: grid; gap: 11px; }.account-card { min-height: 83px; gap: 15px; }.account-icon { display: grid; flex: 0 0 32px; width: 32px; height: 32px; place-items: center; border-radius: 9px; background: #29292c; color: #bcbcc1; font-size: 18px; }.account-copy { display: grid; gap: 2px; }.account-copy strong { color: #f2f2f4; font-size: 15px; }.account-copy small { color: #adadb2; font-size: 13px; }.choice-card:has(input:checked) .account-icon, .choice-card:has(input:checked) .account-copy strong { color: #66aaf8; }
+    .start-error { margin: -10px 0 16px; color: #ff9ca3; font-size: 13px; font-weight: 650; }.continue-button { width: 100%; min-height: 54px; border: 0; border-radius: 11px; background: #ffffff; color: #101012; cursor: pointer; font: 750 16px/1 inherit; transition: background .18s, transform .18s; }.continue-button:hover { background: #e9e9ec; transform: translateY(-1px); }.continue-button span { margin-left: 10px; font-size: 20px; }.security-note { margin: 19px 0 0; color: #99999f; font-size: 12px; text-align: center; }.security-note span { margin: 0 7px; color: #54545a; }
+    @media (max-width: 560px) { .start-page .header-inner, .start-page .container { width: min(100% - 28px, 660px); }.onboarding-shell { padding: 27px 20px; }.country-options { gap: 7px; }.choice-card { min-height: 92px; padding: 9px; }.country-card em { font-size: 17px; }.country-card span { font-size: 13px; }.start-page .header-link { font-size: 12px; } }
+</style>
+
+<section class="onboarding-shell" aria-labelledby="setup-heading">
+    <div class="setup-progress" aria-label="Application progress: 20 percent complete">
+        <div class="setup-progress__bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+        <p>Step 1 of 5 · About 6 minutes</p>
+    </div>
+    <header class="setup-head"><h1 id="setup-heading">Let's get you set up</h1><p>Tell us your country and account type. The steps that follow will adjust automatically.</p></header>
+
+    <form method="post" id="start-application-form">
+        {% csrf_token %}
+        <fieldset class="dark-fieldset"><legend>Country</legend><div class="country-options">
+            {% for c in countries %}<label class="choice-card country-card"><input type="radio" name="country" value="{{ c.code }}" required><span><em>{% if c.code == "SE" %}🇸🇪{% elif c.code == "ES" %}🇪🇸{% else %}🇵🇱{% endif %}</em>{{ c.name }}</span></label>{% endfor %}
+        </div></fieldset>
+
+        <fieldset class="dark-fieldset"><legend>Account type</legend><div class="account-options">
+            {% for value, label in account_types %}<label class="choice-card account-card"><input type="radio" name="account_type" value="{{ value }}" required><span class="account-icon" aria-hidden="true">{% if value == "individual" %}♙{% else %}⌂{% endif %}</span><span class="account-copy"><strong>{{ label }}</strong><small>{% if value == "individual" %}Personal account for everyday banking{% else %}For companies and organisations{% endif %}</small></span></label>{% endfor %}
+        </div></fieldset>
+
+        <p class="start-error" id="start-form-error" role="alert" hidden>Please choose a country and account type to continue.</p>
+        <button type="submit" class="continue-button">Continue <span aria-hidden="true">→</span></button>
+        <p class="security-note">♙ Bank-grade security <span>·</span> Save and resume anytime</p>
+    </form>
+</section>
+<script>
+    document.getElementById('start-application-form').addEventListener('submit', (event) => {
+        const form = event.currentTarget;
+        if (!form.querySelector('input[name="country"]:checked') || !form.querySelector('input[name="account_type"]:checked')) {
+            event.preventDefault(); document.getElementById('start-form-error').hidden = false;
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "onboarding/base.html" %}
+{% block title %}Application result{% endblock %}
+{% block content %}
+
+<h1>Application {{ application.get_status_display }}</h1>
+
+<section class="card result-card result-{{ application.status }}">
+    {% if application.status == "approved" %}
+        <p class="result-headline">Congratulations, your application has been approved.</p>
+    {% elif application.status == "manual_review" %}
+        <p class="result-headline">Your application needs a closer look from our team.</p>
+        <p>We'll be in touch once a case handler has reviewed the flagged items below.</p>
+    {% elif application.status == "rejected" %}
+        <p class="result-headline">We're unable to approve this application.</p>
+    {% elif application.status == "abandoned" or application.status == "expired" %}
+        <p class="result-headline">This application is no longer active ({{ application.get_status_display }}).</p>
+    {% else %}
+        <p class="result-headline">This application is still in progress.</p>
+    {% endif %}
+
+    {% if application.decision_reasons %}
+        <h3>Reasons on file</h3>
+        <ul>
+            {% for reason in application.decision_reasons %}<li>{{ reason }}</li>{% endfor %}
+        </ul>
+    {% endif %}
+</section>
+
+<p><a href="{% url 'audit_trail' application.id %}">View audit trail</a></p>
+{% endblock %}

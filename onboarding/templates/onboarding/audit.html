@@ -1,0 +1,27 @@
+{% extends "onboarding/base.html" %}
+{% block title %}Audit trail{% endblock %}
+{% block content %}
+<h1>Audit trail</h1>
+<p class="lede">
+    Application <code>{{ application.id }}</code> &middot; {{ application.get_country_display }} &middot;
+    {{ application.get_account_type_display }} &middot; status: <strong>{{ application.get_status_display }}</strong>
+</p>
+<p class="help-text">In a production deployment this view would sit behind staff authentication rather than being reachable by the applicant's own session.</p>
+
+<table class="results-table">
+    <thead><tr><th>When</th><th>Event</th><th>Message</th></tr></thead>
+    <tbody>
+    {% for e in events %}
+        <tr>
+            <td>{{ e.created_at|date:"Y-m-d H:i:s" }}</td>
+            <td><span class="pill">{{ e.event_type }}</span></td>
+            <td>{{ e.message }}</td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="3">No events yet.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<p><a href="{% url 'result' application.id %}">&larr; Back to result</a></p>
+{% endblock %}

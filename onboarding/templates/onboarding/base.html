@@ -1,0 +1,75 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Ikano Onboarding{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'onboarding/style.css' %}">
+    <style>
+        .site-header { position: relative; }
+        .site-header .header-inner { display: flex; align-items: center; width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
+        .site-header .brand { display: inline-flex; flex: 0 0 auto; }
+        .site-header .brand-logo { display: block; width: 122px; height: auto; }
+        .site-header .header-link { position: absolute; top: 27px; right: max(20px, calc((100% - 1120px) / 2)); }
+        /* Shared dark banking theme */
+        body { color: #f1f1f3; background: #0b0b0c; }
+        .site-header { background: #0b0b0c; border-color: #252529; }
+        .header-link, .muted-link, .muted-link a { color: #c7c7cc; }
+        .header-link:hover, .muted-link a:hover { color: #ffffff; }
+        h1, h2, h3 { color: #f7f7f8; }
+        .lede, .progress-label, .help-text, .form-note, .form-action, .progress-meta, .site-footer { color: #a9a9b0; }
+        .eyebrow { color: #67aaf8; }
+        .card { border-color: #29292d; background: #151517; box-shadow: 0 20px 48px rgba(0, 0, 0, .28); }
+        .form-card { border-top-color: #2187f4; }
+        .field-group label, legend { color: #e4e4e7; }
+        input[type="text"], input[type="email"], input[type="number"], input[type="date"], select, textarea { border-color: #38383d; background: #1d1d20; color: #f3f3f5; }
+        input:hover, select:hover, textarea:hover { border-color: #5e5e66; }
+        input:focus, select:focus, textarea:focus { border-color: #318df3; box-shadow: 0 0 0 4px rgba(49, 141, 243, .18); }
+        select option { background: #1d1d20; color: #f3f3f5; }
+        .has-error input, .has-error select, .has-error textarea { border-color: #ff6471; background: #281719; }
+        .btn-primary { background: #ffffff; color: #111113; box-shadow: none; }
+        .btn-primary:hover { background: #e7e7ea; box-shadow: none; }
+        .progress-meta { display: flex; align-items: center; justify-content: space-between; gap: 16px; width: 100%; }
+        .form-action { display: flex; align-items: center; width: 100%; }
+        .form-action > span { margin-left: auto; text-align: right; }
+        .progress { background: #303034; }.progress-bar { background: #2187f4; }
+        .summary-list dt, .results-table th { color: #a8a8af; }.summary-list dd { color: #f2f2f4; }
+        .results-table th, .results-table td { border-color: #303034; }.results-table td { color: #e2e2e5; }
+        .option-tile { border-color: #38383d; background: #1b1b1d; color: #e9e9eb; }.option-tile:hover { border-color: #5e5e66; background: #222225; }.option-tile:has(input:checked) { border-color: #2187f4; background: #0d1825; }
+        code { background: #252529; color: #d3d3d8; }.message { border-color: #39393f; }.message-info, .message-success { background: #102a1e; color: #9de4bb; }.message-warning { background: #30270e; color: #f0ce70; }.message-error { background: #351719; color: #ffabb1; }
+        .site-footer { border-top: 1px solid #252529; padding-top: 22px; }
+    </style>
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    <header class="site-header">
+        <div class="header-inner">
+            <a class="brand" href="{% url 'start' %}" aria-label="Ikano Onboarding home">
+                <svg class="brand-logo" viewBox="0 0 244 108" width="122" height="54" role="img" aria-label="Ikano Bank">
+                    <text x="3" y="50" fill="#ed1c24" font-family="Georgia, serif" font-size="54" font-weight="900" letter-spacing="-4">IKANO</text>
+                    <rect x="3" y="61" width="238" height="43" fill="#ed1c24"/>
+                    <text x="62" y="94" fill="#ffffff" font-family="Arial, sans-serif" font-size="34" font-weight="800" letter-spacing="1">BANK</text>
+                </svg>
+            </a>
+            <a class="header-link" href="{% url 'resume_entry' %}">Resume application <span aria-hidden="true">→</span></a>
+        </div>
+    </header>
+
+    <main class="container">
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="message message-{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <span class="footer-lock" aria-hidden="true">◈</span>
+        Demo environment &mdash; verification checks are simulated and no real providers are contacted.
+    </footer>
+</body>
+</html>
