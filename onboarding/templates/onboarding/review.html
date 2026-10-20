@@ -1,44 +1,53 @@
 {% extends "onboarding/base.html" %}
 {% block title %}Review & submit{% endblock %}
 {% block content %}
+<div class="flow-layout">
+    {% include "onboarding/_stepper.html" %}
 
-<div class="progress"><div class="progress-bar" style="width: {{ progress.percent }}%"></div></div>
-<p class="progress-label">Final step</p>
+    <section class="flow-main">
+        {% include "onboarding/_mobile_progress.html" %}
+        <header class="page-head">
+            <p class="eyebrow">Final step</p>
+            <h1>Review your application</h1>
+            <p class="lede">Check your details before you submit. Sensitive identifiers are masked to protect you.</p>
+        </header>
 
-<h1>Review your application</h1>
-<p class="lede">Check everything looks right, then submit. Sensitive identifiers below are masked for your protection.</p>
-
-{% for a in answers %}
-    <section class="card">
-        <h3>{{ a.step_title }}</h3>
-        <dl class="summary-list">
-            {% for key, value in a.data.items %}
-                <dt>{{ key }}</dt><dd>{{ value }}</dd>
-            {% endfor %}
-        </dl>
-    </section>
-{% endfor %}
-
-{% if user.is_staff %}
-<section class="card">
-    <h3>Checks run so far</h3>
-    <table class="results-table">
-        <thead><tr><th>Check</th><th>Outcome</th></tr></thead>
-        <tbody>
-        {% for r in integration_results %}
-            <tr><td>{{ r.check_type }}</td><td><span class="pill pill-{{ r.outcome }}">{{ r.outcome }}</span></td></tr>
+        {% for a in answers %}
+            <section class="card summary-card">
+                <h2>{{ a.step_title }}</h2>
+                <dl class="summary-list">
+                    {% for row in a.rows %}
+                        <dt>{{ row.label }}</dt><dd>{{ row.value }}</dd>
+                    {% endfor %}
+                </dl>
+            </section>
         {% endfor %}
-        </tbody>
-    </table>
-</section>
-{% endif %}
 
-<form method="post" class="card">
-    {% csrf_token %}
-    <label class="option-tile">
-        <input type="checkbox" name="terms_accepted">
-        <span>I confirm the information above is accurate and I accept the terms & conditions.</span>
-    </label>
-    <button type="submit" class="btn-primary">Submit application</button>
-</form>
+        {% if user.is_staff %}
+            <section class="card summary-card staff-panel">
+                <p class="eyebrow">Staff only</p>
+                <h2>Checks run so far</h2>
+                <div class="table-wrap">
+                    <table class="results-table">
+                        <thead><tr><th>Check</th><th>Outcome</th></tr></thead>
+                        <tbody>
+                        {% for r in integration_results %}
+                            <tr><td>{{ r.check_type|capfirst }}</td><td><span class="pill pill-{{ r.outcome }}">{{ r.outcome }}</span></td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        {% endif %}
+
+        <form method="post" class="card submit-card">
+            {% csrf_token %}
+            <label class="checkbox-row">
+                <input type="checkbox" name="terms_accepted">
+                <span>I confirm the information above is accurate and I accept the terms &amp; conditions.</span>
+            </label>
+            <button type="submit" class="btn-primary btn-block">Submit application</button>
+        </form>
+    </section>
+</div>
 {% endblock %}

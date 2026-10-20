@@ -1,30 +1,74 @@
 {% extends "onboarding/base.html" %}
-{% block title %}Application result{% endblock %}
+{% block title %}Your application{% endblock %}
 {% block content %}
+<div class="narrow">
+    <section class="card result-card result-{{ application.status }}">
+        <div class="result-icon" aria-hidden="true">
+            {% if application.status == "approved" %}
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+            {% elif application.status == "rejected" or application.status == "abandoned" or application.status == "expired" %}
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7 7l10 10M17 7L7 17"/></svg>
+            {% else %}
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            {% endif %}
+        </div>
 
-<h1>Application {{ application.get_status_display }}</h1>
+        {% if application.status == "approved" %}
+            <h1>You're approved</h1>
+            <p class="lede">Congratulations — your application has been approved. We'll send your account details shortly.</p>
+        {% elif application.status == "manual_review" %}
+            <h1>We're reviewing your application</h1>
+            <p class="lede">Your application needs a closer look from our team. A case handler will be in touch, usually within two working days.</p>
+        {% elif application.status == "rejected" %}
+            <h1>We can't approve this application</h1>
+            <p class="lede">We're sorry, but we're unable to offer you an account right now.</p>
+        {% elif application.status == "abandoned" or application.status == "expired" %}
+            <h1>This application is no longer active</h1>
+            <p class="lede">It was {{ application.get_status_display|lower }} before it was completed. You're welcome to start a new one.</p>
+        {% else %}
+            <h1>Your application is in progress</h1>
+            <p class="lede">You haven't submitted this application yet.</p>
+        {% endif %}
 
-<section class="card result-card result-{{ application.status }}">
-    {% if application.status == "approved" %}
-        <p class="result-headline">Congratulations, your application has been approved.</p>
-    {% elif application.status == "manual_review" %}
-        <p class="result-headline">Your application needs a closer look from our team.</p>
-        <p>We'll be in touch once a case handler has reviewed your application.</p>
-    {% elif application.status == "rejected" %}
-        <p class="result-headline">We're unable to approve this application.</p>
-    {% elif application.status == "abandoned" or application.status == "expired" %}
-        <p class="result-headline">This application is no longer active ({{ application.get_status_display }}).</p>
-    {% else %}
-        <p class="result-headline">This application is still in progress.</p>
+        <div class="result-meta">
+            <span class="pill">{{ application.get_country_display }}</span>
+            <span class="pill">{{ application.get_account_type_display }}</span>
+            {% if application.decided_at %}<span class="pill">{{ application.decided_at|date:"j M Y" }}</span>{% endif %}
+        </div>
+
+        <div class="result-actions">
+            {% if application.status == "rejected" or application.status == "abandoned" or application.status == "expired" %}
+                <a class="btn-primary" href="{% url 'start' %}">Start a new application</a>
+            {% else %}
+                <a class="btn-secondary" href="{% url 'start' %}">Back to start</a>
+            {% endif %}
+        </div>
+    </section>
+
+    {% if application.status == "manual_review" %}
+        <section class="card next-steps">
+            <h2>What happens next</h2>
+            <ul>
+                <li>A case handler reviews your details.</li>
+                <li>We may contact you for supporting documents.</li>
+                <li>You'll hear from us by email with our decision.</li>
+            </ul>
+        </section>
     {% endif %}
 
-    {% if user.is_staff and application.decision_reasons %}
-        <h3>Reasons on file</h3>
-        <ul>
-            {% for reason in application.decision_reasons %}<li>{{ reason }}</li>{% endfor %}
-        </ul>
+    {% if user.is_staff %}
+        <section class="card next-steps staff-panel">
+            <p class="eyebrow">Staff only</p>
+            <h2>Reasons on file</h2>
+            {% if application.decision_reasons %}
+                <ul>{% for reason in application.decision_reasons %}<li>{{ reason }}</li>{% endfor %}</ul>
+            {% else %}
+                <p class="help-text">No decision recorded yet.</p>
+            {% endif %}
+            <div class="result-actions" style="justify-content: flex-start;">
+                <a class="btn-secondary" href="{% url 'audit_trail' application.id %}">View audit trail</a>
+            </div>
+        </section>
     {% endif %}
-</section>
-
-{% if user.is_staff %}<p><a href="{% url 'audit_trail' application.id %}">View audit trail</a></p>{% endif %}
+</div>
 {% endblock %}

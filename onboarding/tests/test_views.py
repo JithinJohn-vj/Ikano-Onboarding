@@ -111,6 +111,16 @@ class ResumeFlowViewTests(TestCase):
         resp = fresh_client.get(reverse("resume_magic_link", args=["garbage-token"]), follow=True)
         self.assertRedirects(resp, reverse("resume_entry"))
 
+    def test_resume_entry_accepts_a_full_pasted_link(self):
+        application, token = application_service.start_application("SE", "individual")
+        link = "https://example.test" + reverse("resume_magic_link", args=[token])
+        resp = self.client.post(reverse("resume_entry"), {"token": link})
+        self.assertRedirects(resp, reverse("resume_magic_link", args=[token]), fetch_redirect_response=False)
+
+    def test_resume_entry_with_blank_input_asks_again(self):
+        resp = self.client.post(reverse("resume_entry"), {"token": "  "})
+        self.assertRedirects(resp, reverse("resume_entry"))
+
     def test_resume_rotates_the_browser_session(self):
         application, token = application_service.start_application("ES", "business")
         session = self.client.session

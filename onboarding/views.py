@@ -99,7 +99,46 @@ def _progress(flow, current_key):
         idx = keys.index(current_key)
     except ValueError:
         idx = len(keys) - 1
-    return {"current": idx + 1, "total": len(keys), "percent": round((idx) / max(len(keys) - 1, 1) * 100)}
+    steps = [
+        {"title": s.title, "state": "done" if i < idx else "current" if i == idx else "upcoming"}
+        for i, s in enumerate(flow.steps)
+    ]
+    return {
+        "current": idx + 1,
+        "total": len(keys),
+        "percent": round((idx) / max(len(keys) - 1, 1) * 100),
+        "steps": steps,
+    }
+
+
+# Internal correlation keys stored alongside answers that mean nothing to the
+# applicant.
+_HIDDEN_ANSWER_KEYS = {"credit_subject_reference"}
+
+
+def _readable_answers(step_def, data):
+    """Turn a stored answer dict into (label, display value) pairs using the
+    step's field definitions, so the review page never shows raw field names
+    or option codes."""
+    fields = {f.name: f for f in step_def.fields} if step_def else {}
+    # JSONB doesn't keep insertion order, so follow the form's field order.
+    ordered = [name for name in fields if name in data] + [name for name in data if name not in fields]
+    rows = []
+    for name in ordered:
+        value = data[name]
+        if name in _HIDDEN_ANSWER_KEYS:
+            continue
+        field_def = fields.get(name)
+        if isinstance(value, bool):
+            value = "Yes" if value else "No"
+        elif field_def and field_def.choices:
+            value = dict(field_def.choices).get(value, value)
+        elif isinstance(value, float) and value.is_integer():
+            value = int(value)
+        if value in (None, ""):
+            value = "—"
+        rows.append({"label": field_def.label if field_def else name.replace("_", " ").capitalize(), "value": value})
+    return rows
 
 
 # --------------------------------------------------------------------------
@@ -123,7 +162,6 @@ def start(request):
         _grant_access(request, application.id)
         resume_url = request.build_absolute_uri(reverse("resume_magic_link", args=[raw_token]))
         request.session["last_resume_url"] = resume_url
-        messages.info(request, f"Save this link to resume later if you get interrupted: {resume_url}")
         flow = get_flow(country, account_type)
         return redirect("step", application_id=application.id, step_key=flow.first_step().key)
 
@@ -221,7 +259,10 @@ def review(request, application_id):
     answers = []
     for ans in application.answers.all():
         step_def = flow.get_step(ans.step_key)
-        answers.append({"step_title": step_def.title if step_def else ans.step_key, "data": ans.data})
+        answers.append({
+            "step_title": step_def.title if step_def else ans.step_key,
+            "rows": _readable_answers(step_def, ans.data),
+        })
 
     integration_results = application.integration_results.all()
 
@@ -269,7 +310,11 @@ def audit_trail(request, application_id):
 @require_http_methods(["GET", "POST"])
 def resume_entry(request):
     if request.method == "POST":
-        token = request.POST.get("token", "").strip()
+        # Accept the full magic link as well as the bare token at its end.
+        token = request.POST.get("token", "").strip().rstrip("/").rsplit("/", 1)[-1]
+        if not token:
+            messages.error(request, "Paste your resume link or code to continue.")
+            return redirect("resume_entry")
         return redirect("resume_magic_link", token=token)
     return render(request, "onboarding/resume.html")
 

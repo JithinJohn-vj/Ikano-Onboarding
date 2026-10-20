@@ -1,17 +1,23 @@
 {% extends "onboarding/base.html" %}
 {% block title %}Resume application{% endblock %}
 {% block content %}
-<h1>Resume your application</h1>
-<p class="lede">Paste the resume link (or just the token from the end of it) that was shown when you started.</p>
+<div class="narrow">
+    <header class="page-head">
+        <p class="eyebrow">Welcome back</p>
+        <h1>Continue your application</h1>
+        <p class="lede">Paste the private link you saved when you started, or just the code at the end of it.</p>
+    </header>
 
-<form method="post" class="card">
-    {% csrf_token %}
-    <div class="field-group">
-        <label for="id_token">Resume token</label>
-        <input type="text" id="id_token" name="token" placeholder="e.g. Xy19...">
-    </div>
-    <button type="submit" class="btn-primary">Resume</button>
-</form>
+    <form method="post" class="card form-card">
+        {% csrf_token %}
+        <div class="field-group">
+            <label for="id_token">Resume link or code</label>
+            <input type="text" id="id_token" name="token" autocomplete="off" spellcheck="false" placeholder="https://…/resume/Xy19…">
+            <p class="help-text">Links stay valid for 72 hours after you start.</p>
+        </div>
+        <button type="submit" class="btn-primary btn-block">Continue application</button>
+    </form>
 
-<p class="muted-link"><a href="{% url 'start' %}">Or start a new application</a></p>
+    <p class="form-footnote">Don't have a link? <a href="{% url 'start' %}">Start a new application</a></p>
+</div>
 {% endblock %}
