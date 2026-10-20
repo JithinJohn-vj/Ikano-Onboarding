@@ -20,6 +20,24 @@ class StartViewTests(TestCase):
         application = Application.objects.first()
         self.assertRedirects(resp, reverse("step", args=[application.id, "identity"]))
 
+    def test_referrer_policy_keeps_same_site_origin_header(self):
+        # 'no-referrer' makes browsers send `Origin: null` on form posts,
+        # which fails CSRF on any non-loopback host.
+        resp = self.client.get(reverse("start"))
+        self.assertEqual(resp["Referrer-Policy"], "same-origin")
+
+    def test_https_post_with_real_origin_passes_csrf(self):
+        client = Client(enforce_csrf_checks=True)
+        page = client.get(reverse("start"), secure=True)
+        csrf_token = page.cookies["csrftoken"].value
+        response = client.post(
+            reverse("start"),
+            {"country": "SE", "account_type": "individual", "csrfmiddlewaretoken": csrf_token},
+            secure=True,
+            HTTP_ORIGIN="https://testserver",
+        )
+        self.assertEqual(response.status_code, 302)
+
     def test_post_with_missing_selection_shows_error(self):
         resp = self.client.post(reverse("start"), {"country": "", "account_type": ""})
         self.assertEqual(resp.status_code, 200)

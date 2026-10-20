@@ -206,7 +206,10 @@ CSRF_TRUSTED_ORIGINS = os.environ.get(
 CSRF_FAILURE_VIEW = 'onboarding.views.csrf_failure'
 X_FRAME_OPTIONS = 'DENY'
 SECURE_CONTENT_TYPE_NOSNIFF = True
-SECURE_REFERRER_POLICY = 'no-referrer'  # prevents resume tokens leaking via Referer headers
+# Keeps resume-token URLs out of Referer headers sent to other sites.
+# 'no-referrer' would also make browsers send `Origin: null` on same-site form
+# posts, which Django's CSRF origin check rejects.
+SECURE_REFERRER_POLICY = 'same-origin'
 # Vercel terminates TLS at its edge and forwards the original scheme.
 if ON_VERCEL:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

@@ -112,7 +112,7 @@ pytest
 ```
 
 `pytest` is the standard test command and includes an on-screen coverage
-report (the current suite has 95 tests and 96% coverage). The Django test
+report (the current suite has 97 tests and 96% coverage). The Django test
 runner remains available when needed:
 
 ```bash
