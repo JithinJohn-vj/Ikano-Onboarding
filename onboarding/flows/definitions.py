@@ -66,12 +66,14 @@ def build_individual_flow(cfg: CountryConfig) -> Flow:
             key="identity",
             title="Identity verification",
             description=(
-                f"We'll verify your identity via a {cfg.identity_provider_name}-style check."
+                f"We'll verify your identity via a {cfg.identity_provider_name}-style check "
+                "to keep your application secure."
             ),
             fields=(
                 Field(
                     name="full_name",
                     label="Full legal name",
+                    placeholder="Enter your full legal name",
                     required=True,
                     pattern=NAME_PATTERN,
                     pattern_message=NAME_MESSAGE,
@@ -80,6 +82,9 @@ def build_individual_flow(cfg: CountryConfig) -> Flow:
                     name="national_id",
                     label=cfg.person_id_label,
                     help_text=cfg.person_id_help,
+                    placeholder=cfg.person_id_placeholder,
+                    info=f"Your {cfg.person_id_label} is only used to verify your identity "
+                    "and is masked once it has been checked.",
                     pattern=cfg.person_id_pattern,
                     pattern_message=f"Enter a valid {cfg.person_id_label}.",
                     required=True,
@@ -105,12 +110,14 @@ def build_individual_flow(cfg: CountryConfig) -> Flow:
                     name="email",
                     label="Email address",
                     type=FieldType.EMAIL,
+                    placeholder="name@example.com",
                     required=True,
                     max_length=254,
                 ),
                 Field(
                     name="phone",
                     label="Phone number",
+                    placeholder="Enter your mobile number",
                     required=True,
                     pattern=PHONE_PATTERN,
                     pattern_message=PHONE_MESSAGE,
@@ -118,6 +125,7 @@ def build_individual_flow(cfg: CountryConfig) -> Flow:
                 Field(
                     name="street_address",
                     label="Street address",
+                    placeholder="Street name and number",
                     required=True,
                     pattern=ADDRESS_PATTERN,
                     pattern_message=ADDRESS_MESSAGE,

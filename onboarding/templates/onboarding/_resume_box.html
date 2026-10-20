@@ -1,0 +1,22 @@
+{% if request.session.last_resume_url %}
+    <div class="resume-box">
+        <div class="resume-copy">
+            <strong>Save your progress</strong>
+            <p>Use this private link to continue later on any device.</p>
+        </div>
+        <div class="copy-row">
+            <input type="text" id="resume-link" value="{{ request.session.last_resume_url }}" readonly aria-label="Resume link">
+            <button type="button" data-copy="resume-link">Copy link</button>
+        </div>
+    </div>
+    <script>
+        document.querySelectorAll('[data-copy]').forEach((button) => {
+            button.addEventListener('click', async () => {
+                const field = document.getElementById(button.dataset.copy);
+                try { await navigator.clipboard.writeText(field.value); } catch (e) { field.select(); document.execCommand('copy'); }
+                button.textContent = 'Copied';
+                setTimeout(() => { button.textContent = 'Copy link'; }, 1800);
+            });
+        });
+    </script>
+{% endif %}

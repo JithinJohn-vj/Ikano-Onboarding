@@ -1,5 +1,6 @@
 {% extends "onboarding/base.html" %}
 {% block title %}Review & submit{% endblock %}
+{% block body_class %}flow-page{% endblock %}
 {% block content %}
 <div class="flow-layout">
     {% include "onboarding/_stepper.html" %}
@@ -48,6 +49,8 @@
             </label>
             <button type="submit" class="btn-primary btn-block">Submit application</button>
         </form>
+
+        {% include "onboarding/_resume_box.html" %}
     </section>
 </div>
 {% endblock %}

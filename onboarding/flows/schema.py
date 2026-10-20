@@ -43,6 +43,8 @@ class Field:
     min_length: Optional[int] = None
     max_length: Optional[int] = None
     sensitive: bool = False  # if True, value is masked before it is persisted
+    placeholder: str = ""  # example text shown inside an empty input
+    info: str = ""  # short explanation shown behind an info icon by the label
 
 
 @dataclass(frozen=True)

@@ -30,6 +30,7 @@ class CountryConfig:
     postal_code_pattern: str
     postal_code_help: str
     currency: str
+    person_id_placeholder: str = ""
 
 
 COUNTRIES = {
@@ -49,6 +50,7 @@ COUNTRIES = {
         postal_code_pattern=r"^[0-9]{3}\s?[0-9]{2}$",
         postal_code_help="Five digits, optionally with a space (e.g. 111 22).",
         currency="SEK",
+        person_id_placeholder="Enter your 12-digit personal identity number",
     ),
     "ES": CountryConfig(
         code="ES",
@@ -66,6 +68,7 @@ COUNTRIES = {
         postal_code_pattern=r"^[0-9]{5}$",
         postal_code_help="Five digits (e.g. 28013).",
         currency="EUR",
+        person_id_placeholder="Enter your DNI or NIE number",
     ),
     "PL": CountryConfig(
         code="PL",
@@ -83,5 +86,6 @@ COUNTRIES = {
         postal_code_pattern=r"^[0-9]{2}-[0-9]{3}$",
         postal_code_help="Five digits with a hyphen (e.g. 00-001).",
         currency="PLN",
+        person_id_placeholder="Enter your 11-digit PESEL number",
     ),
 }

@@ -1,9 +1,11 @@
 import hashlib
 import logging
+from functools import lru_cache
 
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.conf import settings
+from django.contrib.staticfiles import finders
 from django.core.cache import cache
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -89,8 +91,36 @@ def _build_field_rows(step, raw_values=None, errors=None, existing_data=None):
             value = existing_data.get(f.name)
         else:
             value = ""
-        rows.append({"field": f, "value": value, "error": errors.get(f.name)})
+        rows.append({"field": f, "value": value, "error": errors.get(f.name), "icon": _field_icon(f)})
     return rows
+
+
+_FIELD_ICONS = {
+    "full_name": "person", "rep_full_name": "person", "ubo_names": "person",
+    "national_id": "id", "rep_national_id": "id", "business_id": "id",
+    "legal_name": "building",
+    "email": "mail",
+    "phone": "phone",
+    "street_address": "pin", "postal_code": "pin", "city": "pin", "region": "pin",
+    "iban": "bank",
+}
+
+
+def _field_icon(field_def):
+    """Icon shown inside a text-like input, or None for no icon."""
+    if field_def.type in ("select", "checkbox", "textarea"):
+        return None
+    if field_def.type == "date":
+        return "calendar"
+    return _FIELD_ICONS.get(field_def.name)
+
+
+@lru_cache(maxsize=None)
+def _step_illustration(country: str):
+    """Static path of the country's step-page illustration, if one has been
+    added as onboarding/images/step-<country>.webp."""
+    path = f"onboarding/images/step-{country.lower()}.webp"
+    return path if finders.find(path) else None
 
 
 def _progress(flow, current_key):
@@ -108,6 +138,7 @@ def _progress(flow, current_key):
         "total": len(keys),
         "percent": round((idx) / max(len(keys) - 1, 1) * 100),
         "steps": steps,
+        "illustration": _step_illustration(flow.country),
     }
 
 
