@@ -5,3 +5,6 @@ __pycache__/
 venv/
 .DS_Store
 *.log
+.coverage
+.django_secret_key
+.pytest_cache/

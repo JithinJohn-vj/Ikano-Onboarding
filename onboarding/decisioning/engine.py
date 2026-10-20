@@ -77,7 +77,12 @@ def decide(integration_results) -> Decision:
 
     for result in integration_results:
         rule_set = RULES.get(result.check_type, {})
-        rule = rule_set.get(result.outcome)
+        if result.outcome not in rule_set:
+            # Fail closed: an outcome we have no rule for (new provider
+            # response, typo, unknown check) must never auto-approve.
+            rule = (MANUAL_REVIEW, f"Unrecognised {result.check_type} check outcome '{result.outcome}'")
+        else:
+            rule = rule_set[result.outcome]
         if rule is not None:
             severity, reason = rule
             reasons.append(reason)

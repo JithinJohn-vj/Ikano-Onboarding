@@ -217,9 +217,53 @@ class ResumeTokenTests(TestCase):
         application.refresh_from_db()
         self.assertEqual(application.status, Application.Status.EXPIRED)
 
+    def _make_idle(self, application, hours):
+        Application.objects.filter(pk=application.pk).update(
+            updated_at=timezone.now() - timezone.timedelta(hours=hours)
+        )
+
+    def test_resume_link_still_works_after_abandonment_window_while_valid(self):
+        application, token = application_service.start_application("PL", "individual")
+        self._make_idle(application, 30)  # > ABANDONED_AFTER_HOURS, < token TTL
+        resumed = application_service.resume_application(token)
+        self.assertEqual(resumed.status, Application.Status.IN_PROGRESS)
+
+    def test_idle_application_without_valid_link_is_abandoned(self):
+        application, _ = application_service.start_application("PL", "individual")
+        Application.objects.filter(pk=application.pk).update(
+            resume_token_expires_at=timezone.now() - timezone.timedelta(hours=1)
+        )
+        self._make_idle(application, 30)
+        application.refresh_from_db()
+        application.mark_touched()
+        self.assertEqual(application.status, Application.Status.ABANDONED)
+
     def test_resume_logs_audit_event(self):
         application, token = application_service.start_application("PL", "individual")
         application_service.resume_application(token)
         self.assertTrue(
             AuditEvent.objects.filter(application=application, event_type="resumed").exists()
         )
+
+
+class CreditOverrideFlowTests(TestCase):
+    def test_review_keyword_in_applicant_name_reaches_credit_check(self):
+        application, _ = application_service.start_application("SE", "individual")
+        application_service.submit_step(
+            application, "identity",
+            {"full_name": "Review Person", "national_id": "198506122384", "date_of_birth": "1985-06-12"},
+        )
+        application_service.submit_step(
+            application, "contact",
+            {"email": "r@example.com", "phone": "+46700000000", "street_address": "Storgatan One",
+             "postal_code": "11122", "city": "Stockholm", "region": "Stockholm"},
+        )
+        application_service.submit_step(application, "consent", {"privacy_consent": "on", "pep_declaration": "no"})
+        application_service.submit_step(
+            application, "financials",
+            {"employment_status": "employed", "monthly_income": "40000", "monthly_housing_cost": "8000", "dependants": "0",
+             "monthly_other_living_costs": "5000", "monthly_debt_payments": "0", "employment_months": "24"},
+        )
+        application_service.submit_step(application, "credit_check", {"requested_amount": "10000"})
+        credit = application.integration_results.get(check_type="credit")
+        self.assertEqual(credit.outcome, "weak")

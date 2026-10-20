@@ -26,9 +26,22 @@ def env_flag(name: str, default: bool = False) -> bool:
     return os.environ.get(name, str(int(default))).lower() in {"1", "true", "yes", "on"}
 
 
-# Set DJANGO_SECRET_KEY in every persistent environment. The generated local
-# fallback avoids a hard-coded secret but invalidates sessions after a restart.
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', get_random_secret_key())
+def _local_secret_key() -> str:
+    """Development fallback: generate a key once and keep it in a gitignored
+    file, so sessions and keyed credit subject references stay stable across
+    restarts and across worker processes."""
+    key_file = BASE_DIR / '.django_secret_key'
+    try:
+        return key_file.read_text().strip()
+    except FileNotFoundError:
+        key = get_random_secret_key()
+        key_file.write_text(key)
+        key_file.chmod(0o600)
+        return key
+
+
+# Set DJANGO_SECRET_KEY in every deployed environment.
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY') or _local_secret_key()
 
 # Secure-by-default: local debugging must be deliberately enabled.
 DEBUG = env_flag('DJANGO_DEBUG')
@@ -173,11 +186,7 @@ CACHES = {
 # Email
 # https://docs.djangoproject.com/en/5.2/topics/email/#topic-email-configuration
 
-MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
-    },
-}
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # ---------------------------------------------------------------------------
 # Onboarding app settings

@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
@@ -130,3 +131,38 @@ class ReviewAccessTests(TestCase):
         application.refresh_from_db()
         self.assertEqual(application.status, Application.Status.IN_PROGRESS)
         self.assertEqual(application.integration_results.count(), 0)
+
+
+class ScreeningDisclosureTests(TestCase):
+    """Screening outcomes (e.g. sanctions hits) are staff-only information."""
+
+    def setUp(self):
+        self.application, _ = application_service.start_application("SE", "individual")
+        Application.objects.filter(pk=self.application.pk).update(
+            status=Application.Status.REJECTED,
+            decision_outcome="rejected",
+            decision_reasons=["Confirmed sanctions/PEP match"],
+        )
+        session = self.client.session
+        session[SESSION_ACCESS_KEY] = [str(self.application.id)]
+        session.save()
+
+    def test_applicant_cannot_open_audit_trail(self):
+        response = self.client.get(reverse("audit_trail", args=[self.application.id]))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/admin/login/", response["Location"])
+
+    def test_applicant_result_page_hides_screening_reasons(self):
+        response = self.client.get(reverse("result", args=[self.application.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "sanctions")
+        self.assertNotContains(response, reverse("audit_trail", args=[self.application.id]))
+
+    def test_staff_can_see_reasons_and_audit_trail(self):
+        staff = get_user_model().objects.create_user("case-handler", password="unused-test-pw", is_staff=True)
+        self.client.force_login(staff)
+        session = self.client.session
+        session[SESSION_ACCESS_KEY] = [str(self.application.id)]
+        session.save()
+        self.assertContains(self.client.get(reverse("result", args=[self.application.id])), "Confirmed sanctions/PEP match")
+        self.assertEqual(self.client.get(reverse("audit_trail", args=[self.application.id])).status_code, 200)

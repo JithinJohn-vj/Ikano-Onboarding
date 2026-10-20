@@ -1,3 +1,5 @@
+from unittest import mock
+
 from django.test import SimpleTestCase
 
 from onboarding.integrations.address import AddressLookupClient
@@ -94,8 +96,22 @@ class MagicOverrideTests(SimpleTestCase):
 
     def test_credit_fail_override_is_insufficient(self):
         client = CreditBureauClient()
-        r = client.call({"national_id": "FAIL-999", "monthly_income": 20000, "monthly_housing_cost": 5000, "requested_amount": 10000}, "req-1")
+        r = client.call({"credit_subject_reference": "a1b2c3", "full_name": "Fail Example", "monthly_income": 20000, "monthly_housing_cost": 5000, "requested_amount": 10000}, "req-1")
         self.assertEqual(r.outcome, "insufficient")
+
+    def test_credit_review_override_uses_business_legal_name(self):
+        client = CreditBureauClient()
+        r = client.call({"credit_subject_reference": "a1b2c3", "legal_name": "Review Holdings AB", "annual_turnover": 1000000, "requested_amount": 10000}, "req-1")
+        self.assertEqual(r.outcome, "weak")
+
+    def test_bank_recovery_returns_providers_actual_answer(self):
+        client = BankAccountClient()
+        with mock.patch(
+            "onboarding.integrations.bank.deterministic_bucket", side_effect=["unreachable", "name_mismatch"]
+        ):
+            r = client.call({"iban": "SE3550000000054910000003", "legal_name": "Acme AB"}, "req-1")
+        self.assertEqual(r.outcome, "name_mismatch")
+        self.assertEqual(r.attempt_count, 3)
 
     def test_bank_persistent_timeout_override(self):
         client = BankAccountClient()

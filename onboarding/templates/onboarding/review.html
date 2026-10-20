@@ -19,6 +19,7 @@
     </section>
 {% endfor %}
 
+{% if user.is_staff %}
 <section class="card">
     <h3>Checks run so far</h3>
     <table class="results-table">
@@ -30,6 +31,7 @@
         </tbody>
     </table>
 </section>
+{% endif %}
 
 <form method="post" class="card">
     {% csrf_token %}

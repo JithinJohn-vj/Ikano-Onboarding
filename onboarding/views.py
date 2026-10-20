@@ -2,6 +2,7 @@ import hashlib
 import logging
 
 from django.contrib import messages
+from django.contrib.admin.views.decorators import staff_member_required
 from django.conf import settings
 from django.core.cache import cache
 from django.http import Http404, HttpResponse
@@ -250,16 +251,13 @@ def result(request, application_id):
 
 
 # --------------------------------------------------------------------------
-# Audit trail (would sit behind staff auth in a real deployment -- see
-# README assumptions; kept open here so it's easy to inspect in the demo)
+# Audit trail -- staff only. It records screening outcomes (e.g. sanctions
+# hits) that must not be disclosed to the applicant.
 # --------------------------------------------------------------------------
 
+@staff_member_required
 def audit_trail(request, application_id):
-    try:
-        application = _load_with_access(request, application_id)
-    except _AccessDenied:
-        return redirect("resume_entry")
-
+    application = get_object_or_404(Application, id=application_id)
     events = application.audit_events.all()
     return render(request, "onboarding/audit.html", {"application": application, "events": events})
 

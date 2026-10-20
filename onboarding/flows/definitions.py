@@ -234,6 +234,7 @@ def build_individual_flow(cfg: CountryConfig) -> Flow:
                 check_type="credit",
                 input_fields=(
                     "credit_subject_reference",
+                    "full_name",
                     "monthly_income",
                     "monthly_housing_cost",
                     "requested_amount",
@@ -418,7 +419,7 @@ def build_business_flow(cfg: CountryConfig) -> Flow:
             ),
             integration=IntegrationSpec(
                 check_type="credit",
-                input_fields=("credit_subject_reference", "annual_turnover", "requested_amount"),
+                input_fields=("credit_subject_reference", "legal_name", "annual_turnover", "requested_amount"),
             ),
         ),
         Step(

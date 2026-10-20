@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import uuid
 
+from django.db import transaction
 from django.utils import timezone
 
 from onboarding.decisioning.engine import decide
@@ -30,6 +31,13 @@ from .validation import StepValidationError, validate_step
 
 class ApplicationFlowError(Exception):
     pass
+
+
+def _locked(application: Application) -> Application:
+    """Re-read the application under a row lock so concurrent submissions
+    (double clicks, two tabs) are serialised and each one sees the state the
+    previous one left behind. Must be called inside a transaction."""
+    return Application.objects.select_for_update().get(pk=application.pk)
 
 
 def start_application(country: str, account_type: str) -> tuple[Application, str]:
@@ -99,6 +107,13 @@ def submit_step(application: Application, step_key: str, raw_form_data: dict):
     """Validate + persist a step submission, run any declared integration,
     and advance the application to the next step. Returns the (possibly
     updated) application. Raises StepValidationError on bad input."""
+    with transaction.atomic():
+        _submit_step(_locked(application), step_key, raw_form_data)
+    application.refresh_from_db()
+    return application
+
+
+def _submit_step(application: Application, step_key: str, raw_form_data: dict):
     if application.is_terminal():
         raise ApplicationFlowError("This application has already reached a final state.")
 
@@ -139,6 +154,13 @@ def submit_step(application: Application, step_key: str, raw_form_data: dict):
 def finalize_application(application: Application):
     """Called from the review step: run decisioning over every recorded
     integration result and move the application to a terminal state."""
+    with transaction.atomic():
+        _finalize(_locked(application))
+    application.refresh_from_db()
+    return application
+
+
+def _finalize(application: Application):
     if application.is_terminal():
         raise ApplicationFlowError("This application has already reached a final state.")
 

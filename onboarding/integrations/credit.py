@@ -45,7 +45,9 @@ class CreditBureauClient(BaseIntegrationClient):
         )
         seed = f"credit:{subject_id}"
 
-        override = magic_override(subject_id)
+        # The subject reference is an HMAC digest, so demo keywords are read
+        # from the applicant/company name instead.
+        override = magic_override(payload.get("full_name"), payload.get("legal_name"))
         outcome = OVERRIDE_MAP.get(override) or deterministic_bucket(seed, BUCKETS)
 
         lo, hi = SCORE_RANGE[outcome]

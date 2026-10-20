@@ -68,10 +68,13 @@ class Application(models.Model):
         self.save(update_fields=["resume_token_hash", "resume_token_expires_at"])
         return raw_token
 
-    def resume_token_is_valid(self, raw_token: str) -> bool:
-        if not self.resume_token_hash or not raw_token:
+    def resume_link_is_active(self) -> bool:
+        if not self.resume_token_hash:
             return False
-        if self.resume_token_expires_at and timezone.now() > self.resume_token_expires_at:
+        return not (self.resume_token_expires_at and timezone.now() > self.resume_token_expires_at)
+
+    def resume_token_is_valid(self, raw_token: str) -> bool:
+        if not raw_token or not self.resume_link_is_active():
             return False
         return secrets.compare_digest(self._hash_token(raw_token), self.resume_token_hash)
 
@@ -88,8 +91,10 @@ class Application(models.Model):
     def mark_touched(self):
         """Called on every meaningful interaction; used to decide, on
         access, whether a long-idle in-progress application should flip to
-        'abandoned' instead of running a background job."""
-        if self.status != self.Status.IN_PROGRESS:
+        'abandoned' instead of running a background job. An application
+        whose resume link is still valid is never abandoned, so the link
+        works for its whole advertised lifetime."""
+        if self.status != self.Status.IN_PROGRESS or self.resume_link_is_active():
             return
         idle_hours = getattr(settings, "ABANDONED_AFTER_HOURS", 24)
         if timezone.now() - self.updated_at > timezone.timedelta(hours=idle_hours):

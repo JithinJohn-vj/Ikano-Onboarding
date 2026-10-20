@@ -71,12 +71,16 @@ class DecisioningTests(SimpleTestCase):
         self.assertEqual(decision.outcome, MANUAL_REVIEW)
         self.assertIn("Employment history requires manual assessment", decision.reasons)
 
+    def test_unknown_outcome_fails_closed_to_manual_review(self):
+        decision = decide([FakeResult("identity", "verified"), FakeResult("bank", "provider_said_something_new")])
+        self.assertEqual(decision.outcome, MANUAL_REVIEW)
+        self.assertIn("Unrecognised bank check outcome 'provider_said_something_new'", decision.reasons)
+
+    def test_unknown_check_type_fails_closed_to_manual_review(self):
+        decision = decide([FakeResult("fraud", "clear")])
+        self.assertEqual(decision.outcome, MANUAL_REVIEW)
+
     def test_no_results_still_returns_a_decision_with_a_reason(self):
         decision = decide([])
         self.assertEqual(decision.outcome, APPROVED)
         self.assertTrue(decision.reasons)
-
-    def test_unknown_check_type_or_outcome_is_ignored_not_crashed(self):
-        results = [FakeResult("some_future_check", "weird_outcome")]
-        decision = decide(results)
-        self.assertEqual(decision.outcome, APPROVED)

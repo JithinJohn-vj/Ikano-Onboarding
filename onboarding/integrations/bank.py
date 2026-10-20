@@ -3,6 +3,7 @@ import time
 from .base import BaseIntegrationClient, IntegrationResponse, deterministic_bucket, magic_override
 
 BUCKETS = ("iban_verified",) * 7 + ("name_mismatch",) * 2 + ("unreachable",) * 1
+RECOVERED_BUCKETS = tuple(b for b in BUCKETS if b != "unreachable")
 
 OVERRIDE_MAP = {
     "FAIL": "name_mismatch",
@@ -42,7 +43,12 @@ class BankAccountClient(BaseIntegrationClient):
             while attempts < MAX_ATTEMPTS:
                 time.sleep(RETRY_SLEEP_SECONDS)
                 attempts += 1
-            outcome = "unreachable" if force_persistent_timeout else "iban_verified"
+            if force_persistent_timeout:
+                outcome = "unreachable"
+            else:
+                # The retried call gets the provider's actual answer rather
+                # than an unconditional pass.
+                outcome = deterministic_bucket(f"{seed}:retry", RECOVERED_BUCKETS)
 
         return IntegrationResponse(
             outcome=outcome,

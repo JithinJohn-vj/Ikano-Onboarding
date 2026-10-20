@@ -61,9 +61,10 @@ export POSTGRES_PORT=5432
 
 ### Security configuration
 
-Set a persistent secret before running a long-lived environment. Without it,
-the app generates an in-memory development secret and existing sessions are
-invalidated when the server restarts.
+Set a persistent secret in every deployed environment. Without it, the app
+generates a development secret once and stores it in the gitignored
+`.django_secret_key` file, so sessions and keyed credit references survive
+restarts.
 
 ```bash
 export DJANGO_SECRET_KEY="replace-with-a-long-random-value"
@@ -94,7 +95,7 @@ pytest
 ```
 
 `pytest` is the standard test command and includes an on-screen coverage
-report (the current suite has 86 tests and 94% coverage). The Django test
+report (the current suite has 95 tests and 96% coverage). The Django test
 runner remains available when needed:
 
 ```bash
@@ -114,14 +115,16 @@ tokens, and view-level access control.
    blank, or typing an invalid personnummer/DNI/PESEL/etc. — the pattern is
    country-specific).
 3. After steps that run a check (identity, registry, sanctions, credit,
-   bank), the outcome is recorded and visible on the final **Review** page
-   before you submit.
+   bank), the outcome is recorded. Check outcomes are shown on the
+   **Review** page only to staff users.
 4. Submit on the Review page to get a final decision: **approved**,
-   **manual review**, or **rejected**, with reasons.
-5. From the result page, click **View audit trail** to see every event
-   logged for that application (step completions, integration calls and
-   results, the final decision) — this is also fully browsable per
-   application in **Django admin** (`/admin/`) if you created a superuser.
+   **manual review**, or **rejected**. Applicants see the outcome only;
+   the reasons (which can include sanctions/PEP screening results) are
+   staff-only, to avoid tipping off the applicant.
+5. Log in at `/admin/` as a staff user (see `createsuperuser` above) and
+   open the result page again to see the reasons and a **View audit trail**
+   link listing every event for that application (step completions,
+   integration calls and results, the final decision).
 
 ### Forcing specific outcomes for the demo
 
@@ -130,8 +133,8 @@ can force a specific branch by including a keyword in the relevant field:
 
 | Type into... | Forces |
 |---|---|
-| a full legal name or company legal name containing `FAIL` | a hard-fail outcome for the related identity/registry check; a name is also sanctions-screened, so this can reject the application |
-| a full legal name, company legal name, or city containing `REVIEW` | a manual-review outcome for the related check |
+| a full legal name or company legal name containing `FAIL` | a hard-fail outcome for the related identity/registry check and an `insufficient` credit result; a name is also sanctions-screened, so this can reject the application |
+| a full legal name, company legal name, or city containing `REVIEW` | a manual-review outcome for the related check (a name also gives a `weak` credit result) |
 | a UBO or representative name containing `CONFIRMEDHIT` | a confirmed sanctions/PEP hit (always rejects) |
 | a valid IBAN containing `TIMEOUT` | the bank check stays `unreachable` even after retries |
 
@@ -181,9 +184,8 @@ session, since the token (not the browser session) is what grants access.
   applicant is granted access to their own application in their browser
   session when they create or resume it (resume tokens are the recovery
   mechanism if the session is lost). There's no login system, no separate
-  "applicant" vs "staff" account model. A real deployment would add proper
-  authentication and put the audit-trail view behind staff-only auth
-  (noted directly in `audit.html` and in `views.py`).
+  "applicant" account model. Staff use Django's built-in staff accounts:
+  the audit trail and decision reasons are staff-only.
 - **Resume link is shown in-app, not emailed.** There's no mail
   infrastructure in scope, so the magic link is displayed directly rather
   than sent to an email address. The token mechanism (hashed at rest,

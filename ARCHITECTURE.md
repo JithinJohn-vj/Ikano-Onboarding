@@ -102,6 +102,8 @@ sharing a `base.py` with:
 recorded for an application, look up each `(check_type, outcome)` pair in a
 static `RULES` table, take the worst severity across all of them
 (`approved < manual_review < rejected`), and return all matching reasons.
+An outcome with no rule fails closed to manual review, so a new or
+unexpected provider response can never auto-approve.
 Affordability (a boolean inside the credit check's `details`, not its own
 outcome bucket) is handled as a cross-cutting flag so a "strong" credit
 score with an unaffordable requested amount still lands in manual review.
@@ -162,11 +164,11 @@ manually wiring `Jinja2Templates`, sessions, and forms.
 ## What I'd do next for production
 
 1. Real authentication (magic-link login or SSO) instead of the session-
-   capability model; put `/apply/*/audit/` behind staff-only auth.
-2. Idempotency keys and optimistic locking on step submission. A unique
-   `(application, step_key)` constraint already prevents duplicate answers,
-   but concurrent requests can still race when advancing
-   `Application.current_step_key`.
+   capability model, plus a proper case-handler role instead of Django's
+   `is_staff` flag for the audit trail and decision reasons.
+2. Idempotency keys on step submission. Step submission and finalisation
+   already run in a transaction under a row lock, so concurrent requests
+   are serialised, but a retried request is rejected rather than replayed.
 3. A periodic sweep for abandoned/expired applications, in addition to the
    on-access check.
 4. Replace the mock integration clients with real HTTP clients behind the
