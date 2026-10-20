@@ -302,11 +302,17 @@ code { padding: 2px 7px; border-radius: 6px; background: var(--surface-2); font:
 .stepper li.is-current .step-dot { border-color: var(--brand); background: var(--brand); color: #fff; }
 
 /* Optional per-country illustration under the step list, running to the
-   screen's left edge (onboarding/images/step-<country>.webp). */
+   screen's left edge (onboarding/images/step-<country>.webp|jpg|png). */
 .step-illustration {
     position: relative; z-index: 2; display: block; width: calc(100% + max(24px, (100vw - 1300px) / 2));
     max-width: none; height: auto; margin: -36px 0 0 calc(-1 * max(24px, (100vw - 1300px) / 2));
-    mix-blend-mode: multiply; pointer-events: none;
+    pointer-events: none;
+    /* The sticky column isolates blending, so fade the image's edges into
+       the canvas instead. */
+    -webkit-mask-image: linear-gradient(90deg, #000 78%, transparent 100%), linear-gradient(180deg, transparent 0, #000 16%, #000 78%, transparent 100%);
+    -webkit-mask-composite: source-in;
+    mask-image: linear-gradient(90deg, #000 78%, transparent 100%), linear-gradient(180deg, transparent 0, #000 16%, #000 78%, transparent 100%);
+    mask-composite: intersect;
 }
 
 .resume-box {

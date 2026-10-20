@@ -118,9 +118,12 @@ def _field_icon(field_def):
 @lru_cache(maxsize=None)
 def _step_illustration(country: str):
     """Static path of the country's step-page illustration, if one has been
-    added as onboarding/images/step-<country>.webp."""
-    path = f"onboarding/images/step-{country.lower()}.webp"
-    return path if finders.find(path) else None
+    added as onboarding/images/step-<country>.(webp|jpg|png)."""
+    for ext in ("webp", "jpg", "png"):
+        path = f"onboarding/images/step-{country.lower()}.{ext}"
+        if finders.find(path):
+            return path
+    return None
 
 
 def _progress(flow, current_key):
