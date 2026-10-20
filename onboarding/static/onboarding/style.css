@@ -127,7 +127,7 @@ code { padding: 2px 7px; border-radius: 6px; background: var(--surface-2); font:
 }
 .card + .card { margin-top: 16px; }
 
-.eyebrow { margin-bottom: 14px; color: var(--brand); font-size: 13px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; }
+.eyebrow { margin-bottom: 14px; color: var(--brand); font-size: 12px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; }
 .lede { max-width: 60ch; margin-top: 12px; color: var(--ink-2); font-size: 16px; }
 .page-head { margin-bottom: 28px; }
 
@@ -157,10 +157,24 @@ code { padding: 2px 7px; border-radius: 6px; background: var(--surface-2); font:
 
 /* Decorative shapes drawn in CSS (no images). */
 .deco { position: absolute; z-index: 0; pointer-events: none; }
-.deco-circle {
-    left: -300px; bottom: -40px; width: 560px; height: 560px; border-radius: 50%;
-    background: radial-gradient(circle at 70% 30%, var(--surface) 0, var(--deco-circle) 70%);
+/* Corner photo: its own column that runs to the screen's left edge, with
+   the checklist beside it. Multiply blends the photo's white background
+   into the canvas; the mask softens its right and top edges. */
+.intro-media { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 0; margin-top: 36px; }
+.hero-photo-wrap { position: relative; min-height: 340px; margin-left: calc(-1 * max(24px, (100vw - 1300px) / 2)); }
+.hero-photo {
+    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 6% 55%;
+    mix-blend-mode: multiply; pointer-events: none; user-select: none;
+    -webkit-mask-image: linear-gradient(90deg, #000 72%, transparent 100%), linear-gradient(180deg, transparent 0, #000 10%);
+    -webkit-mask-composite: source-in;
+    mask-image: linear-gradient(90deg, #000 72%, transparent 100%), linear-gradient(180deg, transparent 0, #000 10%);
+    mask-composite: intersect;
 }
+.intro-points { min-width: 0; padding-left: 20px; }
+.intro-points .checklist { margin-top: 0; }
+/* Beside the photo there's room for one trust item per line. */
+.intro-points .trust-row { flex-direction: column; align-items: flex-start; gap: 8px; margin-top: 28px; }
+.intro-points .trust-row span { padding: 0; border: 0; }
 .deco-arc {
     right: -430px; top: 140px; width: 620px; height: 620px; border-radius: 50%;
     background: var(--brand);
@@ -178,35 +192,35 @@ code { padding: 2px 7px; border-radius: 6px; background: var(--surface-2); font:
 
 .start-layout { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 632px); gap: 110px; align-items: start; }
 .start-intro { padding-top: 12px; }
-.start-intro h1 { font-size: clamp(40px, 5.6vw, 68px); font-weight: 800; line-height: 1.04; letter-spacing: -.035em; }
-.start-intro .lede { max-width: 34rem; margin-top: 22px; font-size: 19px; line-height: 1.55; }
+.start-intro h1 { font-size: clamp(36px, 4.6vw, 56px); font-weight: 800; line-height: 1.04; letter-spacing: -.035em; }
+.start-intro .lede { max-width: 32rem; margin-top: 18px; font-size: 17px; line-height: 1.55; }
 
-.checklist { display: grid; gap: 40px; max-width: 34rem; margin: 44px 0 0; padding: 0; list-style: none; }
-.checklist li { display: grid; grid-template-columns: 76px 1fr; gap: 26px; align-items: center; }
+.checklist { position: relative; display: grid; gap: 30px; max-width: 34rem; margin: 40px 0 0; padding: 0; list-style: none; }
+.checklist li { display: grid; grid-template-columns: 64px 1fr; gap: 22px; align-items: center; }
 .checklist .icon {
-    display: grid; place-items: center; width: 76px; height: 76px; border-radius: 50%;
+    display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%;
     background: var(--brand-soft); color: var(--brand); box-shadow: 0 0 0 6px color-mix(in srgb, var(--surface) 70%, transparent);
 }
-.checklist .icon svg { width: 30px; height: 30px; }
-.checklist strong { display: block; margin-bottom: 3px; color: var(--ink); font: 700 19px/1.3 var(--display); }
-.checklist span { color: var(--ink-2); font-size: 15.5px; line-height: 1.5; }
+.checklist .icon svg { width: 26px; height: 26px; }
+.checklist strong { display: block; margin-bottom: 2px; color: var(--ink); font: 700 17px/1.3 var(--display); }
+.checklist span { color: var(--ink-2); font-size: 14.5px; line-height: 1.5; }
 
 .trust-row {
     display: flex; flex-wrap: wrap; align-items: center; gap: 10px 0; max-width: 34rem;
-    margin-top: 40px; padding-top: 22px; border-top: 1px solid var(--line-strong);
-    color: var(--ink-2); font-size: 15px;
+    margin-top: 36px; padding-top: 20px; border-top: 1px solid var(--line-strong);
+    color: var(--ink-2); font-size: 13px;
 }
-.trust-row span { display: inline-flex; align-items: center; gap: 10px; padding: 0 22px; }
-.trust-row span:first-child { padding-left: 16px; }
+.trust-row span { display: inline-flex; align-items: center; gap: 8px; padding: 0 14px; white-space: nowrap; }
+.trust-row span:first-child { padding-left: 0; }
 .trust-row span + span { border-left: 1px solid var(--line-strong); }
-.trust-row svg { width: 18px; height: 18px; }
+.trust-row svg { width: 16px; height: 16px; }
 
 .start-card { padding: 42px 42px 34px; border: 0; border-radius: 28px; box-shadow: var(--shadow-lg); }
-.start-card h2 { margin-bottom: 8px; font-size: clamp(30px, 3vw, 40px); font-weight: 800; letter-spacing: -.03em; }
-.start-card .card-sub { margin-bottom: 30px; color: var(--ink-2); font-size: 17px; }
+.start-card h2 { margin-bottom: 8px; font-size: clamp(28px, 2.6vw, 34px); font-weight: 800; letter-spacing: -.03em; }
+.start-card .card-sub { margin-bottom: 28px; color: var(--ink-2); font-size: 15.5px; }
 
 .choice-fieldset { min-width: 0; margin: 0 0 24px; padding: 0; border: 0; }
-.choice-fieldset legend { margin-bottom: 14px; padding: 0; color: var(--ink); font: 700 18px/1.3 var(--display); }
+.choice-fieldset legend { margin-bottom: 12px; padding: 0; color: var(--ink); font: 700 16px/1.3 var(--display); }
 .country-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .account-options { display: grid; gap: 12px; }
 
@@ -230,7 +244,7 @@ code { padding: 2px 7px; border-radius: 6px; background: var(--surface-2); font:
 .choice-card .check svg { display: none; }
 .choice-card:has(input:checked) .check { border-color: var(--brand); background: var(--brand); box-shadow: inset 0 0 0 4px var(--surface); }
 
-.country-card { flex-direction: column; justify-content: center; gap: 12px; min-height: 118px; padding: 20px 10px 16px; font: 700 18px/1.2 var(--display); text-align: center; }
+.country-card { flex-direction: column; justify-content: center; gap: 12px; min-height: 112px; padding: 20px 10px 16px; font: 700 16px/1.2 var(--display); text-align: center; }
 .country-card .flag { display: block; line-height: 0; }
 .country-card .flag svg { display: block; width: 48px; height: 32px; border-radius: 2px; box-shadow: 0 0 0 1px rgba(15, 27, 61, .1), 0 2px 4px rgba(15, 27, 61, .12); }
 .country-card .check { position: absolute; top: 12px; right: 12px; }
@@ -243,12 +257,12 @@ code { padding: 2px 7px; border-radius: 6px; background: var(--surface-2); font:
 .account-card .account-icon svg { width: 24px; height: 24px; }
 .account-card:has(input:checked) .account-icon { background: var(--brand-tint); color: var(--brand); }
 .account-copy { display: grid; gap: 2px; }
-.account-copy strong { font: 700 19px/1.3 var(--display); }
-.account-copy small { color: var(--ink-2); font-size: 15.5px; }
+.account-copy strong { font: 700 17px/1.3 var(--display); }
+.account-copy small { color: var(--ink-2); font-size: 14px; }
 
-.start-card .btn-primary { min-height: 58px; margin-top: 0; font-size: 21px; }
+.start-card .btn-primary { min-height: 56px; margin-top: 0; font-size: 18px; }
 .start-error { margin: -14px 0 16px; color: var(--bad); font-size: 13.5px; font-weight: 600; }
-.form-footnote { margin-top: 18px; color: var(--ink-2); font-size: 14.5px; text-align: center; }
+.form-footnote { margin-top: 16px; color: var(--ink-2); font-size: 13.5px; text-align: center; }
 
 /* ---------- flow layout (steps + review) ---------- */
 
@@ -388,7 +402,7 @@ input[type="checkbox"] { flex: none; width: 20px; height: 20px; margin: 1px 0 0;
     .start-intro .lede { margin-top: 16px; font-size: 16.5px; }
     .checklist, .trust-row { display: none; }
     .deco-arc { right: -460px; top: 360px; }
-    .deco-circle { display: none; }
+    .intro-media { display: none; }
 
     .flow-layout { grid-template-columns: 1fr; gap: 0; }
     .flow-main { max-width: none; }
