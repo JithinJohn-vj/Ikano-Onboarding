@@ -3,11 +3,14 @@
 {% block body_class %}start-page{% endblock %}
 {% block content %}
 <div class="start-hero">
+<span class="deco deco-circle" aria-hidden="true"></span>
+<span class="deco deco-arc" aria-hidden="true"></span>
+<span class="deco deco-dots" aria-hidden="true"></span>
 <div class="shell start-layout">
     <section class="start-intro">
         <p class="eyebrow">Loan application</p>
         <h1>A loan that fits around you</h1>
-        <p class="lede">Apply online in about 6 minutes and get a decision straight away. We'll tailor each step to your country and whether you're applying personally or for a business.</p>
+        <p class="lede">Apply online in about 6 minutes. We'll tailor each step to your country and whether you're applying personally or for a business.</p>
 
         <ul class="checklist">
             <li>
@@ -19,8 +22,8 @@
                 <div><strong>Your address and contact details</strong><span>Where you live and how we can reach you</span></div>
             </li>
             <li>
-                <span class="icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></span>
-                <div><strong>Income, costs and how much you'd like to borrow</strong><span>So we can check the loan is affordable for you</span></div>
+                <span class="icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20v-6M10 20V9M15 20v-9M20 20V5"/></svg></span>
+                <div><strong>Income and monthly costs</strong><span>So we can lend responsibly</span></div>
             </li>
         </ul>
 
@@ -81,14 +84,6 @@
 </div>
 </div>
 
-<section class="shell how-it-works" aria-labelledby="how-heading">
-    <h2 id="how-heading">How it works</h2>
-    <ol>
-        <li><span class="how-num">1</span><div><strong>Tell us about you</strong><p>A few short steps, tailored to your country.</p></div></li>
-        <li><span class="how-num">2</span><div><strong>We check instantly</strong><p>Identity, credit and affordability checks run as you go.</p></div></li>
-        <li><span class="how-num">3</span><div><strong>Get your decision</strong><p>You'll see the outcome as soon as you submit.</p></div></li>
-    </ol>
-</section>
 <script>
     document.getElementById('start-application-form').addEventListener('submit', (event) => {
         const form = event.currentTarget;
