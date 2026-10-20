@@ -15,13 +15,13 @@
 
         {% if application.status == "approved" %}
             <h1>You're approved</h1>
-            <p class="lede">Congratulations — your application has been approved. We'll send your account details shortly.</p>
+            <p class="lede">Congratulations — your loan application has been approved. We'll send your loan agreement to sign shortly.</p>
         {% elif application.status == "manual_review" %}
-            <h1>We're reviewing your application</h1>
+            <h1>We're reviewing your loan application</h1>
             <p class="lede">Your application needs a closer look from our team. A case handler will be in touch, usually within two working days.</p>
         {% elif application.status == "rejected" %}
-            <h1>We can't approve this application</h1>
-            <p class="lede">We're sorry, but we're unable to offer you an account right now.</p>
+            <h1>We can't approve this loan application</h1>
+            <p class="lede">We're sorry, but we're unable to offer you a loan right now.</p>
         {% elif application.status == "abandoned" or application.status == "expired" %}
             <h1>This application is no longer active</h1>
             <p class="lede">It was {{ application.get_status_display|lower }} before it was completed. You're welcome to start a new one.</p>
