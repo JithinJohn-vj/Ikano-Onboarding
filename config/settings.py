@@ -12,7 +12,9 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 import os
 from pathlib import Path
+from urllib.parse import unquote, urlparse
 
+from django.core.exceptions import ImproperlyConfigured
 from django.core.management.utils import get_random_secret_key
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -40,13 +42,29 @@ def _local_secret_key() -> str:
         return key
 
 
+# Vercel sets VERCEL=1 and the deployment hostnames at runtime.
+ON_VERCEL = env_flag('VERCEL')
+VERCEL_HOSTS = [
+    host for host in (
+        os.environ.get('VERCEL_URL'),
+        os.environ.get('VERCEL_BRANCH_URL'),
+        os.environ.get('VERCEL_PROJECT_PRODUCTION_URL'),
+    ) if host
+]
+
 # Set DJANGO_SECRET_KEY in every deployed environment.
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY') or _local_secret_key()
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+if not SECRET_KEY:
+    if ON_VERCEL:
+        # The deployment filesystem is read-only and per-instance, so a
+        # generated key would differ between instances and break sessions.
+        raise ImproperlyConfigured('Set DJANGO_SECRET_KEY in the Vercel project settings.')
+    SECRET_KEY = _local_secret_key()
 
 # Secure-by-default: local debugging must be deliberately enabled.
 DEBUG = env_flag('DJANGO_DEBUG')
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,testserver').split(',')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,testserver').split(',') + VERCEL_HOSTS
 
 
 # Application definition
@@ -95,16 +113,36 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('POSTGRES_DB', 'ikano_onboarding'),
-        'USER': os.environ.get('POSTGRES_USER', os.environ.get('USER', 'postgres')),
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', ''),
-        'HOST': os.environ.get('POSTGRES_HOST', '127.0.0.1'),
-        'PORT': os.environ.get('POSTGRES_PORT', '5432'),
+# Hosted Postgres providers (Neon, Supabase, Vercel's marketplace) supply a
+# single connection URL; the individual POSTGRES_* variables suit local use.
+DATABASE_URL = os.environ.get('DATABASE_URL') or os.environ.get('POSTGRES_URL')
+
+if DATABASE_URL:
+    _db_url = urlparse(DATABASE_URL)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': unquote(_db_url.path.lstrip('/')),
+            'USER': unquote(_db_url.username or ''),
+            'PASSWORD': unquote(_db_url.password or ''),
+            'HOST': _db_url.hostname,
+            'PORT': str(_db_url.port or 5432),
+            'OPTIONS': dict(
+                pair.split('=', 1) for pair in _db_url.query.split('&') if '=' in pair
+            ) or {'sslmode': 'require'},
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('POSTGRES_DB', 'ikano_onboarding'),
+            'USER': os.environ.get('POSTGRES_USER', os.environ.get('USER', 'postgres')),
+            'PASSWORD': os.environ.get('POSTGRES_PASSWORD', ''),
+            'HOST': os.environ.get('POSTGRES_HOST', '127.0.0.1'),
+            'PORT': os.environ.get('POSTGRES_PORT', '5432'),
+        }
+    }
 
 
 # Password validation
@@ -153,7 +191,7 @@ SERVE_STATIC_FILES = env_flag('DJANGO_SERVE_STATIC_FILES', default=True)
 
 # Cookies remain usable over HTTP for local development. Set
 # DJANGO_SECURE_COOKIES=1 and DJANGO_FORCE_HTTPS=1 behind HTTPS in production.
-SECURE_COOKIES = env_flag('DJANGO_SECURE_COOKIES')
+SECURE_COOKIES = env_flag('DJANGO_SECURE_COOKIES', default=ON_VERCEL)
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = SECURE_COOKIES
 SESSION_COOKIE_SAMESITE = 'Lax'
@@ -164,11 +202,14 @@ CSRF_COOKIE_SAMESITE = 'Lax'
 CSRF_TRUSTED_ORIGINS = os.environ.get(
     'CSRF_TRUSTED_ORIGINS',
     'http://127.0.0.1:8000,http://localhost:8000',
-).split(',')
+).split(',') + [f'https://{host}' for host in VERCEL_HOSTS]
 CSRF_FAILURE_VIEW = 'onboarding.views.csrf_failure'
 X_FRAME_OPTIONS = 'DENY'
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = 'no-referrer'  # prevents resume tokens leaking via Referer headers
+# Vercel terminates TLS at its edge and forwards the original scheme.
+if ON_VERCEL:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_SSL_REDIRECT = env_flag('DJANGO_FORCE_HTTPS')
 SECURE_HSTS_SECONDS = 31_536_000 if SECURE_SSL_REDIRECT else 0
 SECURE_HSTS_INCLUDE_SUBDOMAINS = SECURE_SSL_REDIRECT

@@ -25,4 +25,6 @@ urlpatterns = [
 ]
 
 if settings.SERVE_STATIC_FILES:
-    urlpatterns.append(re_path(r'^static/(?P<path>.*)$', serve_static))
+    # `insecure` lets the staticfiles view serve with DEBUG off; this is an
+    # explicit opt-in via DJANGO_SERVE_STATIC_FILES.
+    urlpatterns.append(re_path(r'^static/(?P<path>.*)$', serve_static, {'insecure': True}))

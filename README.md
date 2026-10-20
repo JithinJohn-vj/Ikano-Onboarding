@@ -88,6 +88,23 @@ loopback development server. A narrowly scoped middleware accepts that origin
 only for `127.0.0.1` and `localhost`, and only after Django validates the CSRF
 token. It has no effect on non-loopback hosts.
 
+### Deploying to Vercel
+
+Vercel hostnames are added to `ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS`
+automatically, and secure cookies are on by default there. In the Vercel
+project settings, set:
+
+- `DJANGO_SECRET_KEY`: a long random value (required; the app refuses to
+  start on Vercel without it)
+- `DATABASE_URL`: a hosted PostgreSQL connection string, for example from
+  Neon via the Vercel Storage tab (`POSTGRES_URL` is also accepted)
+
+Then create the schema once from your machine against that database:
+
+```bash
+DATABASE_URL="postgresql://..." python manage.py migrate
+```
+
 ## 3. Running the tests
 
 ```bash
