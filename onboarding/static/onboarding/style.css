@@ -271,49 +271,39 @@ code { padding: 2px 7px; border-radius: 6px; background: var(--surface-2); font:
 
 .flow-page .shell { width: min(1300px, 100% - 48px); }
 .flow-page .page { padding: 36px 0 56px; }
-.flow-layout { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 48px; align-items: start; }
-.flow-main { max-width: 900px; }
-.flow-main .page-head { margin-bottom: 26px; }
-.flow-main h1 { font-size: clamp(32px, 3.5vw, 48px); line-height: 1.08; letter-spacing: -.03em; }
-.flow-main .lede { max-width: none; margin-top: 10px; color: var(--muted); font-size: 17px; }
+.flow-layout { display: grid; grid-template-columns: 420px minmax(0, 680px); gap: 48px; align-items: start; justify-content: center; }
+.flow-main { max-width: 680px; }
+.flow-main .page-head { margin-bottom: 20px; }
+.flow-main h1 { font-size: clamp(28px, 2.6vw, 36px); line-height: 1.1; letter-spacing: -.025em; }
+.flow-main .lede { max-width: none; margin-top: 8px; color: var(--muted); font-size: 15px; }
 
 .stepper-col { position: sticky; top: 24px; }
 .stepper {
-    position: relative; z-index: 1; padding: 26px 22px 22px; border: 1px solid var(--line); border-radius: var(--radius-lg);
+    position: relative; z-index: 1; padding: 24px 22px 18px; border: 1px solid var(--line); border-radius: var(--radius-lg);
     background: var(--surface); box-shadow: var(--shadow);
 }
-.stepper-context { margin: 0 0 16px 14px; color: var(--ink-2); font-size: 12.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
-.stepper ol { position: relative; display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.stepper-context { margin: 0 0 14px 12px; color: var(--ink-2); font-size: 11.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.stepper ol { position: relative; display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
 .stepper li {
-    position: relative; display: grid; grid-template-columns: 38px 1fr; gap: 16px; align-items: center;
-    padding: 9px 12px; border-radius: var(--radius); color: var(--ink-2); font-size: 15.5px; line-height: 1.35;
+    position: relative; display: grid; grid-template-columns: 32px 1fr; gap: 14px; align-items: center;
+    padding: 7px 12px; border-radius: var(--radius); color: var(--ink-2); font-size: 14px; line-height: 1.35;
 }
 /* Connector between step circles. */
 .stepper li:not(:last-child)::after {
-    content: ""; position: absolute; left: 30.5px; top: calc(50% + 19px); height: calc(100% - 32px); width: 1.5px; background: var(--line-strong);
+    content: ""; position: absolute; left: 27.5px; top: calc(50% + 16px); height: calc(100% - 28px); width: 1.5px; background: var(--line-strong);
 }
 .step-dot {
-    position: relative; z-index: 1; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%;
-    border: 1.5px solid var(--line-strong); background: var(--surface); color: var(--ink-2); font-size: 14px; font-weight: 700;
+    position: relative; z-index: 1; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%;
+    border: 1.5px solid var(--line-strong); background: var(--surface); color: var(--ink-2); font-size: 12.5px; font-weight: 700;
 }
 .stepper li.is-done .step-dot { border-color: var(--brand); background: var(--brand-soft); color: var(--brand); }
 .stepper li.is-done:not(:last-child)::after { background: var(--brand); }
 .stepper li.is-current { background: var(--brand-soft); color: var(--ink); font-weight: 700; }
 .stepper li.is-current .step-dot { border-color: var(--brand); background: var(--brand); color: #fff; }
 
-/* Optional per-country illustration under the step list, running to the
-   screen's left edge (onboarding/images/step-<country>.webp|jpg|png). */
-.step-illustration {
-    position: relative; z-index: 2; display: block; width: calc(100% + max(24px, (100vw - 1300px) / 2));
-    max-width: none; height: auto; margin: -36px 0 0 calc(-1 * max(24px, (100vw - 1300px) / 2));
-    pointer-events: none;
-    /* The sticky column isolates blending, so fade the image's edges into
-       the canvas instead. */
-    -webkit-mask-image: linear-gradient(90deg, #000 78%, transparent 100%), linear-gradient(180deg, transparent 0, #000 16%, #000 78%, transparent 100%);
-    -webkit-mask-composite: source-in;
-    mask-image: linear-gradient(90deg, #000 78%, transparent 100%), linear-gradient(180deg, transparent 0, #000 16%, #000 78%, transparent 100%);
-    mask-composite: intersect;
-}
+/* Optional per-country illustration inside the step card, below the list
+   (onboarding/images/step-<country>.webp|jpg|png). */
+.step-illustration { display: block; width: 100%; height: auto; margin-top: 14px; border-radius: var(--radius); }
 
 .resume-box {
     display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-top: 18px; padding: 16px 20px;
@@ -333,10 +323,10 @@ code { padding: 2px 7px; border-radius: 6px; background: var(--surface-2); font:
 
 /* ---------- form fields ---------- */
 
-.form-card { display: grid; gap: 24px; padding: 36px 40px 30px; }
-.field-group { display: grid; gap: 10px; }
+.form-card { display: grid; gap: 18px; padding: 28px 30px 24px; }
+.field-group { display: grid; gap: 8px; }
 .label-row { display: flex; align-items: center; gap: 10px; }
-.label-row label, .field-group > label { color: var(--ink); font: 700 16px/1.3 var(--display); }
+.label-row label, .field-group > label { color: var(--ink); font: 700 14.5px/1.3 var(--display); }
 .req { color: var(--brand); }
 
 .info-tip { position: relative; display: inline-grid; place-items: center; color: var(--ink-2); cursor: help; border-radius: 50%; }
@@ -349,8 +339,8 @@ code { padding: 2px 7px; border-radius: 6px; background: var(--surface-2); font:
 .info-tip:hover .info-bubble, .info-tip:focus .info-bubble { opacity: 1; visibility: visible; transform: translate(0, -50%); }
 
 .input-wrap { position: relative; }
-.field-icon { position: absolute; z-index: 1; top: 50%; left: 18px; display: grid; color: var(--ink-2); transform: translateY(-50%); pointer-events: none; }
-.input-wrap.has-icon input { padding-left: 56px; }
+.field-icon { position: absolute; z-index: 1; top: 50%; left: 16px; display: grid; color: var(--ink-2); transform: translateY(-50%); pointer-events: none; }
+.input-wrap.has-icon input { padding-left: 48px; }
 /* The design's calendar icon sits on the left; the browser's own picker
    button is stretched invisibly over the field so a click anywhere opens it. */
 .input-wrap input[type="date"] { position: relative; }
@@ -359,8 +349,8 @@ code { padding: 2px 7px; border-radius: 6px; background: var(--surface-2); font:
 }
 
 input[type="text"], input[type="email"], input[type="number"], input[type="date"], select, textarea {
-    width: 100%; min-height: 56px; padding: 12px 18px; border: 1.5px solid var(--line-strong); border-radius: var(--radius-sm);
-    background: var(--surface); color: var(--ink); font: 16px var(--font);
+    width: 100%; min-height: 48px; padding: 10px 16px; border: 1.5px solid var(--line-strong); border-radius: var(--radius-sm);
+    background: var(--surface); color: var(--ink); font: 14.5px var(--font);
     transition: border-color .15s, box-shadow .15s;
 }
 textarea { min-height: 120px; resize: vertical; }
@@ -377,13 +367,13 @@ select {
 .checkbox-row {
     display: flex; align-items: flex-start; gap: 12px; padding: 16px 18px;
     border: 1.5px solid var(--line); border-radius: var(--radius); background: var(--surface-2); cursor: pointer;
-    font-size: 15px; font-weight: 500; transition: border-color .15s, background .15s;
+    font-size: 14px; font-weight: 500; transition: border-color .15s, background .15s;
 }
 .checkbox-row:hover { border-color: var(--line-strong); }
 .checkbox-row:has(input:checked) { border-color: var(--brand); background: var(--brand-soft); }
 input[type="checkbox"] { flex: none; width: 20px; height: 20px; margin: 1px 0 0; accent-color: var(--brand); cursor: pointer; }
 
-.help-text { color: var(--ink-2); font-size: 14px; }
+.help-text { color: var(--ink-2); font-size: 12.5px; }
 .error-text { display: flex; align-items: center; gap: 6px; color: var(--bad); font-size: 13.5px; font-weight: 600; }
 .has-error input, .has-error select, .has-error textarea { border-color: var(--bad); background: var(--bad-soft); }
 .has-error .checkbox-row { border-color: var(--bad); }
@@ -393,9 +383,9 @@ input[type="checkbox"] { flex: none; width: 20px; height: 20px; margin: 1px 0 0;
 .check-panel strong { display: block; margin-bottom: 2px; }
 .check-panel p { color: var(--ink-2); font-size: 14px; }
 
-.form-actions { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 2px; padding-top: 24px; border-top: 1px solid var(--line); }
-.form-actions .form-note { color: var(--ink-2); font-size: 14px; }
-.form-actions .btn-primary { min-width: 240px; min-height: 56px; border-radius: 10px; font-size: 18px; }
+.form-actions { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 2px; padding-top: 20px; border-top: 1px solid var(--line); }
+.form-actions .form-note { color: var(--ink-2); font-size: 13px; }
+.form-actions .btn-primary { min-width: 190px; min-height: 48px; border-radius: 10px; font-size: 15.5px; }
 
 /* ---------- review ---------- */
 
@@ -440,7 +430,7 @@ input[type="checkbox"] { flex: none; width: 20px; height: 20px; margin: 1px 0 0;
 /* ---------- responsive ---------- */
 
 @media (max-width: 1100px) {
-    .flow-layout { grid-template-columns: 290px minmax(0, 1fr); gap: 32px; }
+    .flow-layout { grid-template-columns: 340px minmax(0, 1fr); gap: 32px; }
     .start-layout { grid-template-columns: minmax(0, 1fr) minmax(0, 520px); gap: 48px; }
     .start-card { padding: 34px 30px 30px; }
     .country-card { min-height: 120px; }

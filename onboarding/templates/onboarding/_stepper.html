@@ -10,8 +10,8 @@
                 </li>
             {% endfor %}
         </ol>
+        {% if progress.illustration %}
+            <img class="step-illustration" src="{% static progress.illustration %}" alt="" width="820" height="618" decoding="async">
+        {% endif %}
     </div>
-    {% if progress.illustration %}
-        <img class="step-illustration" src="{% static progress.illustration %}" alt="" decoding="async">
-    {% endif %}
 </aside>
