@@ -38,6 +38,10 @@ class StartViewTests(TestCase):
         )
         self.assertEqual(response.status_code, 302)
 
+    def test_stylesheet_url_changes_with_its_content(self):
+        resp = self.client.get(reverse("start"))
+        self.assertRegex(resp.content.decode(), r"style\.css\?v=[0-9a-f]{12}")
+
     def test_post_with_missing_selection_shows_error(self):
         resp = self.client.post(reverse("start"), {"country": "", "account_type": ""})
         self.assertEqual(resp.status_code, 200)

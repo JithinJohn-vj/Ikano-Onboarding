@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="light dark">
     <title>{% block title %}Open an account{% endblock %} · Ikano Bank</title>
-    <link rel="stylesheet" href="{% static 'onboarding/style.css' %}">
+    <link rel="stylesheet" href="{% static 'onboarding/style.css' %}?v={{ STYLE_VERSION }}">
 </head>
 <body class="{% block body_class %}{% endblock %}">
     <header class="site-header">
