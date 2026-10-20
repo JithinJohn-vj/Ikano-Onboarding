@@ -1,7 +1,9 @@
 {% extends "onboarding/base.html" %}
 {% block title %}Apply for a loan{% endblock %}
+{% block body_class %}start-page{% endblock %}
 {% block content %}
-<div class="start-layout">
+<div class="start-hero">
+<div class="shell start-layout">
     <section class="start-intro">
         <p class="eyebrow">Loan application</p>
         <h1>A loan that fits around you</h1>
@@ -77,6 +79,16 @@
         </form>
     </section>
 </div>
+</div>
+
+<section class="shell how-it-works" aria-labelledby="how-heading">
+    <h2 id="how-heading">How it works</h2>
+    <ol>
+        <li><span class="how-num">1</span><div><strong>Tell us about you</strong><p>A few short steps, tailored to your country.</p></div></li>
+        <li><span class="how-num">2</span><div><strong>We check instantly</strong><p>Identity, credit and affordability checks run as you go.</p></div></li>
+        <li><span class="how-num">3</span><div><strong>Get your decision</strong><p>You'll see the outcome as soon as you submit.</p></div></li>
+    </ol>
+</section>
 <script>
     document.getElementById('start-application-form').addEventListener('submit', (event) => {
         const form = event.currentTarget;
